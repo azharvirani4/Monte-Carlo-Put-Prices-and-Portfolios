@@ -1,0 +1,238 @@
+spinner=c(-5, 2, 10, 20) #vector of possible winnings 
+
+y=1/15 #probability of y 
+g=2*y  #green is twice as likely as yellow
+r=2*g  #red is twice as likely as green
+b=2*r  #blue is twice as likely as red
+
+probabilities=c(b, r, g, y) #probabilities of each color 
+
+spin=sample(spinner, size=1, p=probabilities)
+spin
+## [1] -5
+n.sim=10000
+many.spins=sample(spinner, n.sim, replace=TRUE, p=probabilities)
+fair_price=mean(many.spins)
+
+print(paste("The fair price for entering this game is", fair_price))
+## [1] "The fair price for entering this game is 0.572199999999996"
+
+n=10000 #number of random points for the simulation
+x=runif(n) #random number between 0 and 1 for the x-coordinate 
+y=runif(n) #random number between 0 and 1 for the y-coordinate 
+inside=sum(x^2+y^2<=1) #count how may points fall inside the unit circle
+pi_approx=4*(inside*(1/n)) #estimate pi by multiplying 4 times the fraction of the points of the inside circle
+print(paste("Using Monte Carlo simulation, pi is estimated to be", pi_approx))
+## [1] "Using Monte Carlo simulation, pi is estimated to be 3.1504"
+
+n=10000
+x1=runif(n,-1,1)
+y1=runif(n,-1,1)
+x2=runif(n,-1,1)
+y2=runif(n,-1,1)
+distance=sqrt((x2-x1)^(2)+(y2-y1)^(2))
+estimated_distance=mean(distance)
+print(paste("Using Monte Carlo simulation, the estimated expected distance is:", estimated_distance))
+## [1] "Using Monte Carlo simulation, the estimated expected distance is: 1.0465844893087"
+
+#Problem 4 Part 1 
+r=0.05
+s=c(100, 80, 64, 80, 64, 80, 100, 80, 64, 80, 100)
+#set up the vectors which will contain the portfolio in time
+pi.v=numeric(11)
+cash=numeric(11)
+wealth=numeric(11)
+
+#initialize the rule
+wealth[1]=100
+pi.v[1]=1
+cash[1]=wealth[1]-pi.v[1]*s[1]
+
+#dynamics of the rule
+rebalance=function(s.beg, s.end, shares, cash){
+  coin_toss=sample(c('heads','tails'), size=1, replace=TRUE)
+  if (coin_toss == 'heads') {
+    shares=shares+1 #Buy a share so add 1 to the share 
+    }
+  else {
+    shares=shares-1 #Short a share so subtract 1 from the share 
+    }
+  return(shares) 
+}
+
+#we move forward through time with this rule
+for (i in 1:10){
+  cash[i+1]=cash[i]*exp(r/365)
+  wealth[i+1]=cash[i+1]+pi.v[i]*s[i+1]
+  
+  #before rebalancing
+  print(sprintf("Day=%d, %s", i, "before"))
+  print(sprintf("shares=%6.4f, cash=%6.4f, wealth in stock=%6.4f, total wealth=%6.4f",
+                pi.v[i], cash[i], wealth[i]-cash[i], wealth[i]))
+  
+  #now we rebalance
+  pi.v[i+1]=rebalance(s[i], s[i+1], pi.v[i], cash[i+1])
+  cash[i+1]=cash[i+1]-(pi.v[i+1]-pi.v[i])*s[i+1]
+  
+  #after rebalancing
+  print(sprintf("Day=%d, %s", i, "after"))
+  print(sprintf("shares=%6.4f, cash=%6.4f, wealth in stock=%6.4f, total wealth=%6.4f", 
+                pi.v[i+1], cash[i+1], pi.v[i+1]*s[i+1], wealth[i+1]))
+}
+## [1] "Day=1, before"
+## [1] "shares=1.0000, cash=0.0000, wealth in stock=100.0000, total wealth=100.0000"
+## [1] "Day=1, after"
+## [1] "shares=2.0000, cash=-80.0000, wealth in stock=160.0000, total wealth=80.0000"
+## [1] "Day=2, before"
+## [1] "shares=2.0000, cash=-80.0000, wealth in stock=160.0000, total wealth=80.0000"
+## [1] "Day=2, after"
+## [1] "shares=3.0000, cash=-144.0110, wealth in stock=192.0000, total wealth=47.9890"
+## [1] "Day=3, before"
+## [1] "shares=3.0000, cash=-144.0110, wealth in stock=192.0000, total wealth=47.9890"
+## [1] "Day=3, after"
+## [1] "shares=2.0000, cash=-64.0307, wealth in stock=160.0000, total wealth=95.9693"
+## [1] "Day=4, before"
+## [1] "shares=2.0000, cash=-64.0307, wealth in stock=160.0000, total wealth=95.9693"
+## [1] "Day=4, after"
+## [1] "shares=1.0000, cash=-0.0395, wealth in stock=64.0000, total wealth=63.9605"
+## [1] "Day=5, before"
+## [1] "shares=1.0000, cash=-0.0395, wealth in stock=64.0000, total wealth=63.9605"
+## [1] "Day=5, after"
+## [1] "shares=2.0000, cash=-80.0395, wealth in stock=160.0000, total wealth=79.9605"
+## [1] "Day=6, before"
+## [1] "shares=2.0000, cash=-80.0395, wealth in stock=160.0000, total wealth=79.9605"
+## [1] "Day=6, after"
+## [1] "shares=3.0000, cash=-180.0504, wealth in stock=300.0000, total wealth=119.9496"
+## [1] "Day=7, before"
+## [1] "shares=3.0000, cash=-180.0504, wealth in stock=300.0000, total wealth=119.9496"
+## [1] "Day=7, after"
+## [1] "shares=2.0000, cash=-100.0751, wealth in stock=160.0000, total wealth=59.9249"
+## [1] "Day=8, before"
+## [1] "shares=2.0000, cash=-100.0751, wealth in stock=160.0000, total wealth=59.9249"
+## [1] "Day=8, after"
+## [1] "shares=1.0000, cash=-36.0888, wealth in stock=64.0000, total wealth=27.9112"
+## [1] "Day=9, before"
+## [1] "shares=1.0000, cash=-36.0888, wealth in stock=64.0000, total wealth=27.9112"
+## [1] "Day=9, after"
+## [1] "shares=2.0000, cash=-116.0938, wealth in stock=160.0000, total wealth=43.9062"
+## [1] "Day=10, before"
+## [1] "shares=2.0000, cash=-116.0938, wealth in stock=160.0000, total wealth=43.9062"
+## [1] "Day=10, after"
+## [1] "shares=1.0000, cash=-16.1097, wealth in stock=100.0000, total wealth=83.8903"
+
+
+
+
+
+
+#Problem 4 Part 2
+r=0.05
+s=c(100, 80, 64, 80, 64, 80, 100, 80, 64, 80, 100)
+#set up the vectors which will contain the portfolio in time
+pi.v=numeric(11)
+cash=numeric(11)
+wealth=numeric(11)
+
+#initialize the rule
+wealth[1]=100
+pi.v[1]=1
+cash[1]=wealth[1]-pi.v[1]*s[1]
+
+#dynamics of the rule
+rebalance=function(s.beg, s.end, shares, cash){
+  coin_toss=sample(c('heads','tails'), size=1, replace=TRUE)
+  if(s.end < s.beg) {
+    if(coin_toss == 'heads') {
+      shares=shares*(2/3)
+    }
+    else {
+        shares=shares*(3/4)
+         } 
+  } 
+  else {
+  if (coin_toss == 'heads') {
+    shares=shares*(3)
+  } 
+  else {
+    shares=shares*(4)
+        }
+  }
+  return(shares)
+}
+  
+
+#we move forward through time with this rule
+for (i in 1:10){
+  cash[i+1]=cash[i]*exp(r/365)
+  wealth[i+1]=cash[i+1]+pi.v[i]*s[i+1]
+  
+  #before rebalancing
+  print(sprintf("Day=%d, %s", i, "before"))
+  print(sprintf("shares=%6.4f, cash=%6.4f, wealth in stock=%6.4f, total wealth=%6.4f",
+                pi.v[i], cash[i], wealth[i]-cash[i], wealth[i]))
+  
+  #now we rebalance
+  pi.v[i+1]=rebalance(s[i], s[i+1], pi.v[i], cash[i+1])
+  cash[i+1]=cash[i+1]-(pi.v[i+1]-pi.v[i])*s[i+1]
+  
+  #after rebalancing
+  print(sprintf("Day=%d, %s", i, "after"))
+  print(sprintf("shares=%6.4f, cash=%6.4f, wealth in stock=%6.4f, total wealth=%6.4f", 
+                pi.v[i+1], cash[i+1], pi.v[i+1]*s[i+1], wealth[i+1]))
+}
+## [1] "Day=1, before"
+## [1] "shares=1.0000, cash=0.0000, wealth in stock=100.0000, total wealth=100.0000"
+## [1] "Day=1, after"
+## [1] "shares=0.7500, cash=20.0000, wealth in stock=60.0000, total wealth=80.0000"
+## [1] "Day=2, before"
+## [1] "shares=0.7500, cash=20.0000, wealth in stock=60.0000, total wealth=80.0000"
+## [1] "Day=2, after"
+## [1] "shares=0.5000, cash=36.0027, wealth in stock=32.0000, total wealth=68.0027"
+## [1] "Day=3, before"
+## [1] "shares=0.5000, cash=36.0027, wealth in stock=32.0000, total wealth=68.0027"
+## [1] "Day=3, after"
+## [1] "shares=1.5000, cash=-43.9923, wealth in stock=120.0000, total wealth=76.0077"
+## [1] "Day=4, before"
+## [1] "shares=1.5000, cash=-43.9923, wealth in stock=120.0000, total wealth=76.0077"
+## [1] "Day=4, after"
+## [1] "shares=1.0000, cash=-11.9984, wealth in stock=64.0000, total wealth=52.0016"
+## [1] "Day=5, before"
+## [1] "shares=1.0000, cash=-11.9984, wealth in stock=64.0000, total wealth=52.0016"
+## [1] "Day=5, after"
+## [1] "shares=3.0000, cash=-172.0000, wealth in stock=240.0000, total wealth=68.0000"
+## [1] "Day=6, before"
+## [1] "shares=3.0000, cash=-172.0000, wealth in stock=240.0000, total wealth=68.0000"
+## [1] "Day=6, after"
+## [1] "shares=12.0000, cash=-1072.0236, wealth in stock=1200.0000, total wealth=127.9764"
+## [1] "Day=7, before"
+## [1] "shares=12.0000, cash=-1072.0236, wealth in stock=1200.0000, total wealth=127.9764"
+## [1] "Day=7, after"
+## [1] "shares=9.0000, cash=-832.1704, wealth in stock=720.0000, total wealth=-112.1704"
+## [1] "Day=8, before"
+## [1] "shares=9.0000, cash=-832.1704, wealth in stock=720.0000, total wealth=-112.1704"
+## [1] "Day=8, after"
+## [1] "shares=6.0000, cash=-640.2844, wealth in stock=384.0000, total wealth=-256.2844"
+## [1] "Day=9, before"
+## [1] "shares=6.0000, cash=-640.2844, wealth in stock=384.0000, total wealth=-256.2844"
+## [1] "Day=9, after"
+## [1] "shares=24.0000, cash=-2080.3721, wealth in stock=1920.0000, total wealth=-160.3721"
+## [1] "Day=10, before"
+## [1] "shares=24.0000, cash=-2080.3721, wealth in stock=1920.0000, total wealth=-160.3721"
+## [1] "Day=10, after"
+## [1] "shares=96.0000, cash=-9280.6571, wealth in stock=9600.0000, total wealth=319.3429"
+
+
+
+library(ggplot2)
+a = read.csv("apple-puts.csv")
+View(a)
+#Formula for MidPrice
+a$MidPrice = ((a$Ask + a$Bid)*0.5)
+#Making line plot using ggplot function 
+ggplot(a, aes(x = Strike, 
+              y = MidPrice)) +
+  geom_line() +
+  #Labeling axes  
+  labs(title = "Mid Price vs. Strike Price for Apple Put Options for February 14th",
+       x = "Strike Price",
+       y = "Mid Price")
